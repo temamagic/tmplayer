@@ -7,7 +7,7 @@ export async function fetchSongsApi(offset = 0, limit = 5) {
     // data should be array of { id, title, artist, src, cover }
     return data;
   } catch (e) {
-    console.error('fetchSongsApi error', e);
+    console.error("fetchSongsApi error", e);
     return [];
   }
 }

@@ -10,19 +10,24 @@
       />
     </ul>
 
-    <div style="text-align:center; padding:12px; color:var(--muted)" v-if="loading">⏳ Загрузка...</div>
-    <div style="text-align:center; padding:12px; color:var(--muted)" v-if="allLoaded && songs.length === 0">
+    <div class="text-center text-gray-400 py-3" v-if="loading">
+      ⏳ Loading...
+    </div>
+    <div
+      class="text-center text-gray-400 py-3"
+      v-if="allLoaded && songs.length === 0"
+    >
       No tracks here.
     </div>
   </section>
 </template>
 
 <script setup>
-import SongItem from './SongItem.vue';
+import SongItem from "./SongItem.vue";
 const props = defineProps({
   songs: Array,
   currentIndex: Number,
   loading: Boolean,
-  allLoaded: Boolean
+  allLoaded: Boolean,
 });
 </script>

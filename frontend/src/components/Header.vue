@@ -1,27 +1,39 @@
 <template>
-  <header class="header">
-    <div class="brand">
-      <div class="logo">A</div>
+  <header
+    class="bg-[#111111] px-4 py-3 flex items-center justify-between shadow"
+  >
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-cyan-400 rounded flex items-center justify-center text-white font-bold"
+      >
+        A
+      </div>
       <div>
-        <div style="font-weight:600">TMPlayer</div>
-        <div class="small">tracks/ — folder</div>
+        <div class="font-semibold">TMPlayer</div>
+        <div class="text-xs text-gray-400">tracks/ — folder</div>
       </div>
     </div>
 
-    <div style="display:flex; gap:8px; align-items:center;">
+    <div class="flex items-center gap-2">
       <button class="btn" @click="onRefresh">🔄 Refresh</button>
-      <button class="btn" v-if="!allLoaded && !loading" @click="$emit('loadMore')">Load more</button>
+      <button
+        class="btn"
+        v-if="!allLoaded && !loading"
+        @click="$emit('loadMore')"
+      >
+        Load more
+      </button>
     </div>
   </header>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits } from "vue";
 const props = defineProps({
   loading: { type: Boolean, default: false },
-  allLoaded: { type: Boolean, default: false }
+  allLoaded: { type: Boolean, default: false },
 });
-const emit = defineEmits(['refresh','loadMore']);
+const emit = defineEmits(["refresh", "loadMore"]);
 
-const onRefresh = () => emit('refresh');
+const onRefresh = () => emit("refresh");
 </script>

@@ -1,4 +1,4 @@
-import { ref, reactive, computed, watch, nextTick } from 'vue';
+import { ref, reactive, computed, watch, nextTick } from "vue";
 
 /**
  * usePlayer(fetchSongsFn)
@@ -14,17 +14,19 @@ export default function usePlayer(fetchSongsFn) {
   const loading = ref(false);
 
   const currentIndex = ref(-1);
-  const currentSong = computed(() => (currentIndex.value >= 0 ? songs.value[currentIndex.value] : null));
+  const currentSong = computed(() =>
+    currentIndex.value >= 0 ? songs.value[currentIndex.value] : null,
+  );
 
   // audio element
   const audio = ref(new Audio());
-  audio.value.preload = 'metadata';
-  audio.value.crossOrigin = 'anonymous';
+  audio.value.preload = "metadata";
+  audio.value.crossOrigin = "anonymous";
 
   const isPlaying = ref(false);
   const progress = ref(0);
-  const currentTimeDisplay = ref('0:00');
-  const durationDisplay = ref('0:00');
+  const currentTimeDisplay = ref("0:00");
+  const durationDisplay = ref("0:00");
 
   // WebAudio
   const audioCtx = ref(null);
@@ -41,9 +43,11 @@ export default function usePlayer(fetchSongsFn) {
 
   // helpers
   const formatTime = (s) => {
-    if (!s && s !== 0) return '0:00';
+    if (!s && s !== 0) return "0:00";
     const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    const sec = Math.floor(s % 60)
+      .toString()
+      .padStart(2, "0");
     return `${m}:${sec}`;
   };
 
@@ -69,7 +73,9 @@ export default function usePlayer(fetchSongsFn) {
     if (!audioCtx.value) return;
     try {
       if (sourceNode.value) {
-        try { sourceNode.value.disconnect(); } catch (e) {}
+        try {
+          sourceNode.value.disconnect();
+        } catch (e) {}
         sourceNode.value = null;
       }
       // createMediaElementSource can only be used once per element in some browsers;
@@ -77,7 +83,7 @@ export default function usePlayer(fetchSongsFn) {
       sourceNode.value = audioCtx.value.createMediaElementSource(audio.value);
       sourceNode.value.connect(analyser.value);
     } catch (e) {
-      console.warn('connectSource failed', e);
+      console.warn("connectSource failed", e);
     }
   };
 
@@ -104,14 +110,14 @@ export default function usePlayer(fetchSongsFn) {
     audio.value.src = s.src;
     try {
       if (!audioCtx.value) initAudioGraph();
-      if (audioCtx.value.state === 'suspended') await audioCtx.value.resume();
+      if (audioCtx.value.state === "suspended") await audioCtx.value.resume();
       connectSource();
       gainNode.value.gain.value = 0; // start from 0 then fadeIn
       await audio.value.play();
       fadeIn();
       isPlaying.value = true;
     } catch (e) {
-      console.warn('playSong error', e);
+      console.warn("playSong error", e);
     }
   };
 
@@ -123,7 +129,7 @@ export default function usePlayer(fetchSongsFn) {
     }
     if (audio.value.paused) {
       // resume
-      if (audioCtx.value.state === 'suspended') await audioCtx.value.resume();
+      if (audioCtx.value.state === "suspended") await audioCtx.value.resume();
       fadeIn();
       await audio.value.play();
       isPlaying.value = true;
@@ -131,7 +137,9 @@ export default function usePlayer(fetchSongsFn) {
       // pause with fade
       fadeOut();
       setTimeout(() => {
-        try { audio.value.pause(); } catch (e) {}
+        try {
+          audio.value.pause();
+        } catch (e) {}
       }, 460);
       isPlaying.value = false;
     }
@@ -166,7 +174,8 @@ export default function usePlayer(fetchSongsFn) {
 
   const seek = (pct) => {
     if (!audio.value.duration) return;
-    audio.value.currentTime = Math.max(0, Math.min(1, pct)) * audio.value.duration;
+    audio.value.currentTime =
+      Math.max(0, Math.min(1, pct)) * audio.value.duration;
     updateProgress();
   };
 
@@ -197,20 +206,24 @@ export default function usePlayer(fetchSongsFn) {
         offset.value += data.length;
       }
     } catch (e) {
-      console.error('loadMore error', e);
+      console.error("loadMore error", e);
     } finally {
       loading.value = false;
     }
   };
 
   // event wiring
-  audio.value.addEventListener('timeupdate', updateProgress);
-  audio.value.addEventListener('loadedmetadata', () => {
+  audio.value.addEventListener("timeupdate", updateProgress);
+  audio.value.addEventListener("loadedmetadata", () => {
     durationDisplay.value = formatTime(audio.value.duration || 0);
   });
-  audio.value.addEventListener('play', () => { isPlaying.value = true; });
-  audio.value.addEventListener('pause', () => { isPlaying.value = false; });
-  audio.value.addEventListener('ended', nextSong);
+  audio.value.addEventListener("play", () => {
+    isPlaying.value = true;
+  });
+  audio.value.addEventListener("pause", () => {
+    isPlaying.value = false;
+  });
+  audio.value.addEventListener("ended", nextSong);
 
   // watchers for settings
   watch(volume, (v) => {

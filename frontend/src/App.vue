@@ -1,6 +1,11 @@
 <template>
-  <div class="min-h-screen flex flex-col">
-    <Header :loading="loading" :allLoaded="allLoaded" @refresh="onRefresh" @loadMore="loadMore" />
+  <div>
+    <Header
+      :loading="loading"
+      :allLoaded="allLoaded"
+      @refresh="onRefresh"
+      @loadMore="loadMore"
+    />
     <main class="flex-1 overflow-auto p-4 space-y-4">
       <Visualizer
         :analyser="analyserNode"
@@ -34,13 +39,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed, watch } from 'vue';
-import Header from './components/Header.vue';
-import SongList from './components/SongList.vue';
-import Visualizer from './components/Visualizer.vue';
-import PlayerFooter from './components/PlayerFooter.vue';
-import usePlayer from './composables/usePlayer.js';
-import { fetchSongsApi } from './services/api.js';
+import { onMounted, ref, computed, watch } from "vue";
+import Header from "./components/Header.vue";
+import SongList from "./components/SongList.vue";
+import Visualizer from "./components/Visualizer.vue";
+import PlayerFooter from "./components/PlayerFooter.vue";
+import usePlayer from "./composables/usePlayer.js";
+import { fetchSongsApi } from "./services/api.js";
 
 // init composable with API function
 const player = usePlayer(fetchSongsApi);
@@ -75,8 +80,12 @@ const prevSong = player.prevSong;
 const seek = player.seek;
 
 // wiring UI events
-const onPlayFromList = async (index) => { await playSong(index); };
-const onRefresh = async () => { await refreshSongs(); };
+const onPlayFromList = async (index) => {
+  await playSong(index);
+};
+const onRefresh = async () => {
+  await refreshSongs();
+};
 
 const onSeek = (pct) => seek(pct);
 
@@ -88,8 +97,8 @@ onMounted(async () => {
 const updateFavicon = (icon) => {
   let link = document.querySelector("link[rel~='icon']");
   if (!link) {
-    link = document.createElement('link');
-    link.rel = 'icon';
+    link = document.createElement("link");
+    link.rel = "icon";
     document.head.appendChild(link);
   }
   link.href = icon;
@@ -98,18 +107,18 @@ const updateFavicon = (icon) => {
 watch(
   () => ({
     song: currentSong.value,
-    playing: isPlaying.value
+    playing: isPlaying.value,
   }),
   ({ song, playing }) => {
-    const icon = !song ? '/music.svg' : playing ? '/play.svg' : '/pause.svg';
+    const icon = !song ? "/music.svg" : playing ? "/play.svg" : "/pause.svg";
     let link = document.querySelector("link[rel~='icon']");
     if (!link) {
-      link = document.createElement('link');
-      link.rel = 'icon';
+      link = document.createElement("link");
+      link.rel = "icon";
       document.head.appendChild(link);
     }
     link.href = icon;
   },
-  { immediate: true, deep: false }
+  { immediate: true, deep: false },
 );
 </script>
