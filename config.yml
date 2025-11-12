@@ -1,0 +1,4 @@
+server:
+  addr: ":8080"
+myusic:
+  root: "./music"
