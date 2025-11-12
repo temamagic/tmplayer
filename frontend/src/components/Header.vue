@@ -15,7 +15,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button class="btn" @click="onRefresh">🔄 Refresh</button>
+          <button class="btn" @click="refreshTracks">🔄 Refresh</button>
           <button
             class="btn"
             v-if="!allLoaded && !loading"
@@ -23,6 +23,7 @@
           >
             Load more
           </button>
+          <button class="btn" @click="router.push('/upload')">📂 Upload</button>
         </div>
       </div>
     </div>
@@ -30,12 +31,25 @@
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
 import { defineProps, defineEmits } from "vue";
+import { refreshTracksApi } from "../services/api.js";
+
+const router = useRouter();
 const props = defineProps({
   loading: { type: Boolean, default: false },
   allLoaded: { type: Boolean, default: false },
 });
 const emit = defineEmits(["refresh", "loadMore"]);
+
+const refreshTracks = async () => {
+  const result = await refreshTracksApi();
+  if (result?.status === "ok") {
+    emit("refresh");
+  } else {
+    console.error("refreshTracks failed");
+  }
+};
 
 const onRefresh = () => emit("refresh");
 </script>

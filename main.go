@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/dhowden/tag"
 
@@ -78,6 +79,7 @@ func scanTracks(root string) ([]Track, error) {
 
 		metadata, err := tag.ReadFrom(file)
 		if err != nil {
+			log.Printf("metadata read error for %s: %v", path, err)
 			return nil
 		}
 
@@ -169,6 +171,48 @@ func handleRefresh(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "ok", "count": len(tracks)})
 }
 
+// POST /api/tracks/add
+func handleAddTrack(c *fiber.Ctx) error {
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "File not found in request",
+		})
+	}
+
+	if fileHeader.Header.Get("Content-Type")[:5] != "audio" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Wrong file type",
+		})
+	}
+
+	uploadDir := cfg.Music.Root
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Can't create dir",
+		})
+	}
+
+	base := strings.TrimSuffix(fileHeader.Filename, filepath.Ext(fileHeader.Filename))
+	timestamp := time.Now().Unix()
+	filename := fmt.Sprintf("%s_%d%s", base, timestamp, filepath.Ext(fileHeader.Filename))
+	savePath := filepath.Join(uploadDir, filename)
+
+	// Сохраняем файл
+	if err := c.SaveFile(fileHeader, savePath); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error on save file",
+		})
+	}
+	log.Println("saved file:", savePath)
+
+	return c.JSON(fiber.Map{
+		"message":  "File uploaded",
+		"filename": filename,
+		"path":     savePath,
+	})
+}
+
 // -------- MAIN --------
 
 func main() {
@@ -186,7 +230,9 @@ func main() {
 		log.Printf("initial scan error: %v", err)
 	}
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		BodyLimit: 20 * 1024 * 1024, // 20 MB
+	})
 	app.Use(logger.New())
 	app.Static("/tracks", cfg.Music.Root)
 	app.Static("/", "./res/dist")
@@ -195,6 +241,7 @@ func main() {
 	api := app.Group("/api")
 	api.Get("/tracks", handleGetTracks)
 	api.Get("/tracks/refresh", handleRefresh)
+	api.Post("/tracks/add", handleAddTrack)
 
 	// SPA fallback
 	app.Get("/*", func(c *fiber.Ctx) error {
