@@ -6,7 +6,7 @@
       @refresh="onRefresh"
       @loadMore="loadMore"
     />
-    <main class="flex-1 overflow-auto p-4 space-y-4">
+    <main class="flex-1 overflow-auto p-4 space-y-4 pt-20 pb-36">
       <Visualizer
         :analyser="analyserNode"
         v-model:enabled="vizEnabled"
@@ -30,6 +30,7 @@
       :currentTime="currentTimeDisplay"
       :duration="durationDisplay"
       :isPlaying="isPlaying"
+      v-model:volume="volume"
       @togglePlay="togglePlay"
       @prev="prevSong"
       @next="nextSong"
