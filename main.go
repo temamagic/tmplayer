@@ -63,15 +63,15 @@ func scanTracks(root string) ([]Track, error) {
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			log.Printf("WALK: %s err: %v", root, err)
+			log.Printf("WALK: %s err: %v", path, err)
 			return err
 		}
 		if info.IsDir() {
-			log.Printf("WALK: %s is dir", root)
+			log.Printf("WALK: %s is dir", path)
 			return nil
 		}
 		if !isAudioFile(path) {
-			log.Printf("WALK: %s not audio file", root)
+			log.Printf("WALK: %s not audio file", path)
 			return nil
 		}
 
