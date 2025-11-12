@@ -58,6 +58,7 @@ func isAudioFile(path string) bool {
 }
 
 func scanTracks(root string) ([]Track, error) {
+	log.Printf("SCAN: open %s",root)
 	var result []Track
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -73,10 +74,12 @@ func scanTracks(root string) ([]Track, error) {
 
 		file, err := os.Open(path)
 		if err != nil {
+			log.Printf("OS OPEN ERROR: open %s: %v",path, err)
 			return nil
 		}
 		defer file.Close()
 
+		log.Printf("META: read meta from %s", path)
 		metadata, err := tag.ReadFrom(file)
 		if err != nil {
 			log.Printf("metadata read error for %s: %v", path, err)
