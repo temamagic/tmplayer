@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  tmplayer:
+    image: ghcr.io/temamagic/tmplayer:latest
+    user: "${UID}:${GID}"
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - ./music:/app/music
+      - ./config.yml:/app/config.yml
+    restart: always
