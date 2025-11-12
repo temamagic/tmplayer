@@ -6,13 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"mime"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/h2non/filetype"
 
 	"github.com/dhowden/tag"
 
@@ -52,13 +53,29 @@ var (
 
 // -------- UTILS --------
 func isAudioFile(path string) bool {
-	ext := strings.ToLower(filepath.Ext(path))
-	mimeType := mime.TypeByExtension(ext)
-	return strings.HasPrefix(mimeType, "audio/")
+	file, err := os.Open(path)
+	if err != nil {
+		log.Printf("OS OPEN ERROR: open %s: %v", path, err)
+		return false
+	}
+	defer file.Close()
+
+	head := make([]byte, 261) // reading part of file to detect
+	_, err = file.Read(head)
+	if err != nil {
+		log.Printf("Error reading file: %v", err)
+		return false
+	}
+
+	if filetype.IsAudio(head) {
+		return true
+	}
+
+	return false
 }
 
 func scanTracks(root string) ([]Track, error) {
-	log.Printf("SCAN: open %s",root)
+	log.Printf("SCAN: open %s", root)
 	var result []Track
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -77,7 +94,7 @@ func scanTracks(root string) ([]Track, error) {
 
 		file, err := os.Open(path)
 		if err != nil {
-			log.Printf("OS OPEN ERROR: open %s: %v",path, err)
+			log.Printf("OS OPEN ERROR: open %s: %v", path, err)
 			return nil
 		}
 		defer file.Close()

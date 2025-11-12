@@ -5,6 +5,7 @@ go 1.25.3
 require (
 	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8
 	github.com/gofiber/fiber/v2 v2.52.9
+	github.com/h2non/filetype v1.1.3
 	github.com/jinzhu/configor v1.2.2
 )
 
