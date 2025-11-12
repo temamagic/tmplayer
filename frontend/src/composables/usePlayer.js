@@ -9,7 +9,7 @@ export default function usePlayer(fetchSongsFn) {
   // state
   const songs = ref([]);
   const offset = ref(0);
-  const limit = ref(5);
+  const limit = ref(10);
   const allLoaded = ref(false);
   const loading = ref(false);
 
