@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +12,8 @@ import (
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/dhowden/tag"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -66,21 +70,40 @@ func scanTracks(root string) ([]Track, error) {
 			return nil
 		}
 
+		file, err := os.Open(path)
+		if err != nil {
+			return nil
+		}
+		defer file.Close()
+
+		metadata, err := tag.ReadFrom(file)
+		if err != nil {
+			return nil
+		}
+
+		title := metadata.Title()
+		if title == "" {
+			title = strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+		}
+
+		artist := metadata.Artist()
+
+		// обложка
+		var cover string
+		picture := metadata.Picture()
+		if picture != nil {
+			cover = fmt.Sprintf("data:%s;base64,%s", picture.MIMEType, encodeBase64(picture.Data))
+		}
+
 		rel, _ := filepath.Rel(root, path)
 		id := strings.ReplaceAll(rel, string(os.PathSeparator), "_")
-
-		title := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
-		dir := filepath.Dir(rel)
-		artist := ""
-		if dir != "." {
-			artist = filepath.Base(dir)
-		}
 
 		t := Track{
 			ID:       id,
 			Title:    title,
 			Artist:   artist,
 			Src:      fmt.Sprintf("/tracks/%s", rel),
+			Cover:    cover,
 			FilePath: path,
 		}
 		result = append(result, t)
@@ -96,6 +119,10 @@ func scanTracks(root string) ([]Track, error) {
 	})
 
 	return result, nil
+}
+
+func encodeBase64(data []byte) string {
+	return string(bytes.TrimSpace([]byte(base64.StdEncoding.EncodeToString(data))))
 }
 
 func refreshTracks() error {
